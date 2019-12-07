@@ -15,52 +15,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WPGraphQL\AppContext;
+use WPGraphQL\Data\DataSource;
+
 add_action( 'graphql_register_types', function() {
 
 	register_graphql_field( 'RootQuery', 'homepage', [
 		'type' => 'Page',
 		'description' => __( 'Returns the homepage', 'wp-graphql-homepage' ),
-		'resolve' => function() {
+		'resolve' => function($item, array $args, AppContext $context) {
       $page_on_front = get_option( 'page_on_front', 0 );
       
 			if ($page_on_front == 0 ) {
         return null;
       }
 
-      query_posts(array(
-        'p' => $page_on_front,
-        'post_type' => 'page'
-      ));
-      the_post();
-
-      $homepage = $post;
-      wp_reset_query();
-
-			return $homepage;
+			return  DataSource::resolve_post_object( $page_on_front, $context );
 		},
 	]);
 
 	register_graphql_field( 'RootQuery', 'pageForPosts', [
 		'type' => 'Page',
 		'description' => __( 'Returns the page for posts', 'wp-graphql-homepage' ),
-		'resolve' => function() {
+		'resolve' => function($item, array $args, AppContext $context) {
       $page_for_posts = get_option( 'page_for_posts', 0 );
       
 			if ($page_for_posts == 0 ) {
         return null;
       }
 
-
-      query_posts(array(
-        'p' => $page_for_posts,
-        'post_type' => 'page'
-      ));
-      the_post();
-
-      $postPage = $post;
-      wp_reset_query();
-
-			return $postPage;
+			return DataSource::resolve_post_object( $page_for_posts, $context );
 		},
 	]);
 
